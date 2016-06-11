@@ -7,25 +7,27 @@ Params:
 &value=integer
 */
 "use strict"
-"use latest"
 let redis = require('redis');
 
 module.exports = function(ctx, done){
-
+  /*
+  1. connect to redis server
+  2. parse query params from url 
+  3. perform appropriate read/write action
+  */
   let client = connectToRedisServer(function(){
     parseQueryString(
-      /*read callback*/
+      /* read callback */
       function(payer, payee){
         read(payer, payee)
       }, 
-      /*write callback*/
+      /* write callback */
       function(payer, payee, value){
         write(payer, payee, value);
       }
     );
-  })
-
-  /*connect to redis server*/
+  });
+  /* connect to redis server */
   function connectToRedisServer(callback){
     let client = redis.createClient(
       12983,
@@ -33,13 +35,13 @@ module.exports = function(ctx, done){
       {no_ready_check: true}
     );
     /* set password */
-    client.auth(ctx.data.REDIS_PASSWORD, function (err) {
+    client.auth(ctx.data.REDIS_PASSWORD, function(err){
       if (err){
         console.log(err);
         finish(err);
       }
     });
-    /*connected to redis*/
+    /* connected to redis */
     client.on('connect', function() {
       console.log('Connected to Redis');
       callback();
